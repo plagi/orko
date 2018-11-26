@@ -146,10 +146,10 @@
                     <pluginExecution>
                       <pluginExecutionFilter>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-dependency-plugin</artifactId>
-                        <versionRange>${maven-dependency-plugin.version}</versionRange>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <versionRange>${maven.shade.plugin.version}</versionRange>
                         <goals>
-                          <goal>copy-dependencies</goal>
+                          <goal>shade</goal>
                         </goals>
                       </pluginExecutionFilter>
                       <action>
@@ -217,7 +217,7 @@
 
     <maven.jar.plugin.version>3.0.2</maven.jar.plugin.version>
     <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
-    <maven-dependency-plugin-version>3.0.2</maven-dependency-plugin-version>
+    <maven.shade.plugin.version>2.4.1</maven.shade.plugin.version>
     <maven-resources-plugin-version>3.1.0</maven-resources-plugin-version>
     <maven-surefire-plugin-version>2.22.1</maven-surefire-plugin-version>
     <maven.enforcer.plugin.version>1.4.1</maven.enforcer.plugin.version>
@@ -451,19 +451,36 @@
           </configuration>
         </plugin>
         <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-dependency-plugin</artifactId>
-          <version>${maven-dependency-plugin-version}</version>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${maven.shade.plugin.version}</version>
+          <configuration>
+            <createDependencyReducedPom>true</createDependencyReducedPom>
+            <transformers>
+              <transformer
+                implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+              <transformer
+                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <mainClass>${mainClass}</mainClass>
+              </transformer>
+            </transformers>
+            <!-- exclude signed Manifests -->
+            <filters>
+              <filter>
+                <artifact>*:*</artifact>
+                <excludes>
+                  <exclude>META-INF/*.SF</exclude>
+                  <exclude>META-INF/*.DSA</exclude>
+                  <exclude>META-INF/*.RSA</exclude>
+                </excludes>
+              </filter>
+            </filters>
+          </configuration>
           <executions>
             <execution>
-              <id>copy-dependencies</id>
               <phase>package</phase>
               <goals>
-                <goal>copy-dependencies</goal>
+                <goal>shade</goal>
               </goals>
-              <configuration>
-                <prependGroupId>true</prependGroupId>
-              </configuration>
             </execution>
           </executions>
         </plugin>
